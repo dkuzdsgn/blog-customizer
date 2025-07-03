@@ -4,9 +4,8 @@ import { Select } from 'src/ui/select';
 import { RadioGroup } from 'src/ui/radio-group';
 import { Separator } from 'src/ui/separator';
 import { useState, useEffect, useRef } from 'react';
-
+import { Text } from 'src/ui/text';
 import styles from './ArticleParamsForm.module.scss';
-
 
 import {
 	fontFamilyOptions,
@@ -15,28 +14,25 @@ import {
 	backgroundColors,
 	contentWidthArr,
 	ArticleStateType,
+	defaultArticleState,
 } from 'src/constants/articleProps';
+import clsx from 'clsx';
 
 type Props = {
-	initialSettings: ArticleStateType;
-	onApply: (settings: ArticleStateType) => void;
-	onReset: () => void;
+	setSettings: React.Dispatch<React.SetStateAction<ArticleStateType>>;
 };
 
-export const ArticleParamsForm = ({
-	initialSettings,
-	onApply,
-	onReset,
-}: Props) => {
+export const ArticleParamsForm = ({ setSettings }: Props) => {
 	const [isOpen, setIsOpen] = useState(false);
 
 	const formRef = useRef<HTMLDivElement>(null);
 
-	const [formState, setFormState] = useState<ArticleStateType>(initialSettings);
+	const [formState, setFormState] =
+		useState<ArticleStateType>(defaultArticleState);
 
 	useEffect(() => {
-		setFormState(initialSettings);
-	}, [initialSettings]);
+		setFormState(defaultArticleState);
+	}, []);
 
 	useEffect(() => {
 		const handleClickOutside = (e: MouseEvent) => {
@@ -57,14 +53,17 @@ export const ArticleParamsForm = ({
 		setFormState((prev) => ({ ...prev, [key]: value }));
 	};
 
+	const handleApply = () => {
+		setSettings(formState);
+	};
+
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
-		onApply(formState);
+		handleApply();
 	};
 
 	const handleReset = () => {
-		setFormState(initialSettings);
-		onReset();
+		setSettings(defaultArticleState);
 	};
 
 	const handleToggle = () => setIsOpen(!isOpen);
@@ -73,12 +72,15 @@ export const ArticleParamsForm = ({
 		<>
 			<ArrowButton isOpen={isOpen} onClick={handleToggle} />
 			<aside
-				className={`${styles.container} ${isOpen ? styles.container_open : ''}`}
+				className={clsx(styles.container, { [styles.container_open]: isOpen })}
 				ref={formRef}>
 				<form
 					className={styles.form}
 					onSubmit={handleSubmit}
 					onReset={handleReset}>
+					<Text as='h2' size={31} weight={800} uppercase>
+						Задайте параметры
+					</Text>
 					<Select
 						selected={formState.fontFamilyOption}
 						onChange={(option) => handleChange('fontFamilyOption', option)}
